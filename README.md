@@ -1,2 +1,1 @@
-# do180-pub
-For sharing to students sample files
+Files for sharing with students in DO180 class
