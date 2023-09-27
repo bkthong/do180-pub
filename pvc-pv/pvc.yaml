@@ -1,0 +1,16 @@
+# Will result in a pending pvc that cannot be bound 
+# assuming no static pv with empty storageClassName
+# And the default storage class in classroom which
+# supports dynamic provisioning cannot be
+# used since we set storageClassName to ""
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: mypvc
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: ""
+  resources:
+    requests:
+      storage: 100Mi

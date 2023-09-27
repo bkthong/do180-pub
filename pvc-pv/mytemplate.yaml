@@ -1,0 +1,72 @@
+apiVersion: template.openshift.io/v1
+kind: Template
+metadata:
+  name: mydbtemplate
+parameters:
+- name: NAME
+  description: Name for various objects created
+  value: mydb
+  required: true
+- name: STORAGE_SIZE
+  description: used for the pvc
+  value: 1Gi
+  required: true
+objects:
+- apiVersion: v1
+  kind: PersistentVolumeClaim
+  metadata:
+    name: ${NAME}
+  spec:
+    accessModes:
+      - ReadWriteOnce
+    resources:
+      requests:
+        storage: ${STORAGE_SIZE}
+
+- apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    labels:
+      app: ${NAME}
+    name: ${NAME}
+  spec:
+    selector:
+      matchLabels:
+        deployment: mysql
+    strategy:
+      type: Recreate
+    template:
+      metadata:
+        labels:
+          deployment: mysql
+      spec:
+        containers:
+        - env:
+          - name: MYSQL_DATABASE
+            value: crm
+          - name: MYSQL_PASSWORD
+            value: "123"
+          - name: MYSQL_USER
+            value: alice
+          image: registry.access.redhat.com/rhscl/mysql-57-rhel7@sha256:9a781abe7581cc141e14a7e404ec34125b3e89c008b14f4e7b41e094fd3049fe
+          imagePullPolicy: IfNotPresent
+          name: mysql
+          ports:
+          - containerPort: 3306
+            protocol: TCP
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+          volumeMounts: 
+          - mountPath: /var/lib/mysql/data
+            name: myvol
+        dnsPolicy: ClusterFirst
+        restartPolicy: Always
+        schedulerName: default-scheduler
+        securityContext: {}
+        terminationGracePeriodSeconds: 30
+        volumes:
+        - name: myvol
+          persistentVolumeClaim:
+            claimName: ${NAME}
+

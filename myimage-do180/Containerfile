@@ -1,0 +1,28 @@
+# Using ubi-init as it has ps command in it -- no longer using ubi-init as it seems
+# to cause pod termination issues. So installing procps-ng to have access to ps command
+FROM registry.access.redhat.com/ubi8/ubi:latest
+
+ENV JAVA_HOME=/some/value \
+    VERSION=qa
+
+LABEL internalid=19.1 \
+      dept=hr \
+      io.k8s.description="This is custom image for demo in  class"  \
+      io.openshift.expose-services=80:http
+
+EXPOSE 80
+
+#Install yum. Also installing procps-ng to have the ps command for
+#convenience
+RUN yum -y install httpd procps-ng && yum clean all
+
+#ADD auto-extracts tar files and can download from URLs
+ADD  images.tar /var/www/html
+ADD  https://tomcat.apache.org/tomcat-7.0-doc/appdev/sample/sample.war /var/www/html
+COPY images.tar /var/tmp/
+COPY src/ /var/www/html
+                              
+#USER 1001
+#VOLUME /var/www/cgi-scripts/
+
+ENTRYPOINT ["httpd" , "-D" , "FOREGROUND" ] 

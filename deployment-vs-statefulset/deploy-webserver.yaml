@@ -1,0 +1,41 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: web-deploy
+  name: web-deploy
+spec:
+  selector:
+    matchLabels:
+      deployment: web-deploy
+  strategy:
+    type: Recreate
+  replicas: 2
+  template:
+    metadata:
+      labels:
+        deployment: web-deploy
+    spec:
+      containers:
+      - image: quay.io/bkthong/webserver-hello-ocp:1.1
+        imagePullPolicy: IfNotPresent
+        name: web-deploy
+        ports:
+        - containerPort: 8080
+          protocol: TCP
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+        volumeMounts: 
+        - mountPath: /var/www/html
+          name: myvol
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+      volumes:
+      - name: myvol
+        persistentVolumeClaim:
+          claimName: mypvc
+
